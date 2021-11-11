@@ -18,6 +18,7 @@ import equipmentRender from './equipment-render.js';
 import * as characterController from './character-controller.js';
 import {playersManager} from './players-manager.js';
 import * as postProcessing from './post-processing.js';
+import * as faceTracking from './face-tracking.js';
 import {
   getRenderer,
   scene,
@@ -80,6 +81,7 @@ export default class Webaverse extends EventTarget {
       transformControls.waitForLoad(),
       // WSRTC.waitForReady(),
       metaverseModules.waitForLoad(),
+      faceTracking.waitForLoad(),
     ])
     this.contentLoaded = false;
   }
