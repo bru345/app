@@ -201,9 +201,10 @@ const animationsAngleArraysMirror = {
   ],
 };
 const animationsIdleArrays = {
-  walk: {name: 'idle.fbx'},
-  run: {name: 'idle.fbx'},
+  walk: {name: 'sword_idle_side.fbx'},
+  run: {name: 'sword_idle_side.fbx'},
   crouch: {name: 'Crouch Idle.fbx'},
+  swordIdleSide: {name: 'sword_idle_side.fbx'},
 };
 
 let animations;
@@ -221,8 +222,11 @@ let jumpAnimationSegments;
 let chargeJump;
 let standCharge;
 let fallLoop;
+
+//TODO make sword animations into single object like useAnimation
 let swordSideSlash;
-let swordtopDownSlash;
+let swordTopDownSlash;
+let swordIdleSide;
 const loadPromise = (async () => {
   await Promise.resolve(); // wait for metaversefile to be defined
   
@@ -265,6 +269,7 @@ const loadPromise = (async () => {
   }
   for (const k in animationsIdleArrays) {
     animationsIdleArrays[k].animation = animations.find(animation => animation.name === animationsIdleArrays[k].name);
+    console.log( animationsIdleArrays[k].animation)
   }
 
   const _normalizeAnimationDurations = (animations, baseAnimation, factor = 1) => {
@@ -335,7 +340,8 @@ const loadPromise = (async () => {
   standCharge = animations.find(a => a.isStandCharge);
   fallLoop = animations.find(a => a.isFallLoop);
   swordSideSlash = animations.find(a => a.isSwordSideSlash);
-  swordtopDownSlash = animations.find(a => a.isSwordTopDownSlash)
+  swordTopDownSlash = animations.find(a => a.isSwordTopDownSlash)
+  swordIdleSide = animations.find(a => a.isSwordIdleSide)
 
 
   jumpAnimation = animations.find(a => a.isJump);
@@ -1217,6 +1223,8 @@ class Avatar {
     this.swordSideSlashTime = 0;
     this.swordTopDownSlashState = false;
     this.swordTopDownSlashTime = 0;
+    this.swordIdleSideState = false;
+    this.swordIdleSideTime = 0;
     this.aimState = false;
     this.aimDirection = new THREE.Vector3();
     
@@ -1672,10 +1680,17 @@ class Avatar {
       const angle = this.getAngle();
       const timeSeconds = now/1000;
       
-      const _getAnimationKey = (crouchState, velocity) => {
+      //TODO REMOVE DEBUG OVER CROUCH
+      const _getAnimationKey = (crouchState, velocity, combatIdleState) => {
         if (crouchState) {
+          console.log('crouch key');
           return 'crouch';
-        } else {
+        } 
+        else if (combatIdleState) {
+          console.log('combat idle key');
+          "swordIdleSide"
+        }
+        else {
           if (currentSpeed >= runSpeed) {
             return 'run';
           } else {
@@ -1805,9 +1820,17 @@ class Avatar {
         false,
         this.velocity,
       );
+
+      const keyCombat = _getAnimationKey(
+        false,
+        this.velocity,
+        this.swordIdleSideState
+      );
       const keyAnimationAngles = _getClosest2AnimationAngles(key);
       const keyAnimationAnglesMirror = _getMirrorAnimationAngles(keyAnimationAngles, key);
       const idleAnimation = _getIdleAnimation(key);
+
+
 
 
       const soundManager = metaversefile.useSoundManager();
@@ -1857,6 +1880,11 @@ class Avatar {
         true,
         this.velocity,
       );
+
+      // const keyCombatAnimationAngles = _getClosest2AnimationAngles(keyCombat);
+      // const keyCombatAnimationAnglesMirror = _getMirrorAnimationAngles(keyCombatAnimationAngles, keyCombat);
+      // const idleCombatAnimation = _getIdleAnimation(keyCombat);
+
       const keyAnimationAnglesOther = _getClosest2AnimationAngles(keyOther);
       const keyAnimationAnglesOtherMirror = _getMirrorAnimationAngles(keyAnimationAnglesOther, keyOther);
       const idleAnimationOther = _getIdleAnimation(keyOther);
@@ -1896,7 +1924,9 @@ class Avatar {
 
       const _getHorizontalBlend = (k, lerpFn, target) => {
         _get5wayBlend(keyAnimationAngles, keyAnimationAnglesMirror, idleAnimation, mirrorFactor, angleFactor, speedFactor, k, lerpFn, localQuaternion);
-        _get5wayBlend(keyAnimationAnglesOther, keyAnimationAnglesOtherMirror, idleAnimationOther, mirrorFactor, angleFactor, speedFactor, k, lerpFn, localQuaternion2);
+        // _get5wayBlend(keyAnimationAnglesOther, keyAnimationAnglesOtherMirror, idleAnimationOther, mirrorFactor, angleFactor, speedFactor, k, lerpFn, localQuaternion2);
+       // _get5wayBlend(keyAnimationAnglesOther, keyCombatAnimationAnglesMirror, idleCombatAnimation, mirrorFactor, angleFactor, speedFactor, k, lerpFn, localQuaternion2);
+
         
         lerpFn
           .call(
@@ -2022,6 +2052,21 @@ class Avatar {
             dst.fromArray(v2);
           };
         }
+        if (this.swordIdleSideState) {
+          return spec => {
+            const {
+              animationTrackName: k,
+              dst,
+              isTop,
+            } = spec;
+
+            const t2 = (this.swordIdleSideTime/1000) ;
+            const src2 = swordIdleSide.interpolants[k];
+            const v2 = src2.evaluate(t2);
+
+            dst.fromArray(v2);
+          };
+        }
         if (this.swordTopDownSlashState) {
           return spec => {
             const {
@@ -2033,7 +2078,7 @@ class Avatar {
             console.log('Broken thru')
 
             const t2 = (this.swordTopDownSlashTime/1000) ;
-            const src2 = swordtopDownSlash.interpolants[k];
+            const src2 = swordTopDownSlash.interpolants[k];
             const v2 = src2.evaluate(t2);
 
             dst.fromArray(v2);

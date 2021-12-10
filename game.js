@@ -1414,22 +1414,38 @@ const gameManager = {
       this.menuGridSnap();
     } else {
       const localPlayer = metaversefileApi.useLocalPlayer();
-      const action = localPlayer.getAction('standCharge');
+      const action = localPlayer.getAction('swordTopDownSlash');
       if (!action) {
         const newAction = {
-          type: 'standCharge',
-          animation: 'standCharge',
+          type: 'swordTopDownSlash',
+          animation: 'swordTopDownSlash',
           // time: 0,
         };
         console.log(newAction)
 
         localPlayer.addAction(newAction);
+        setTimeout(() => {
+          localPlayer.removeAction('swordSideSlash');
+
+          const newAction2 = {
+            type: 'swordSideSlash',
+            animation: 'swordSideSlash',
+            // time: 0,
+          };
+          localPlayer.addAction(newAction2);
+          
+          setTimeout(() => {
+            localPlayer.removeAction('swordSideSlash');
+            localPlayer.removeAction('swordTopDownSlash');
+
+          }, 1200);
+        }, 1000);
       }
     }
   },
   menuVUp(e) {
     const localPlayer = metaversefileApi.useLocalPlayer();
-    localPlayer.removeAction('standCharge');
+    // localPlayer.removeAction('swordSideSlash');
   },
   menuBDown(e) {
     if (e.ctrlKey) {

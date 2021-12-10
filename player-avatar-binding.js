@@ -93,6 +93,8 @@ export function applyPlayerActionsToAvatar(player, rig) {
   const swordSideSlashAnimation = swordSideSlash ? swordSideSlash.animation : '';
   const swordTopDownSlash = player.getAction('swordTopDownSlash');
   const swordTopDownSlashAnimation = swordTopDownSlash ? swordTopDownSlash.animation : '';
+  const swordIdleSide = player.getAction('swordIdleSide');
+  const swordIdleSideAnimation = swordIdleSide ? swordIdleSide.animation : '';
 
 
   rig.jumpState = !!jumpAction;
@@ -130,6 +132,9 @@ export function applyPlayerActionsToAvatar(player, rig) {
   rig.swordTopDownSlashTime = player.actionInterpolants.swordTopDownSlash.get();
   rig.swordTopDownSlashAnimation = swordTopDownSlashAnimation;
   rig.swordTopDownSlashState = !!swordTopDownSlash;
+  rig.swordIdleSide = player.actionInterpolants.swordIdleSide.get();
+  rig.swordIdleSideState = !!swordIdleSide;
+  rig.swordIdleSideAnimation = swordIdleSideAnimation;
 
 }
 export function applyPlayerChatToAvatar(player, rig) {
