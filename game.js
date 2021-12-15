@@ -48,6 +48,7 @@ const localRaycaster = new THREE.Raycaster();
 let chargeIdleTimer;
 let jumpActionName;
 let isDirectional = false;
+let testOnce = false;
 
 
 const oneVector = new THREE.Vector3(1, 1, 1);
@@ -1445,7 +1446,6 @@ const gameManager = {
     localPlayer.removeAction('chargeIdle');
 
     jumpActionName = isDirectionHeld ? 'chargeJumpForward' : 'chargeJump';
-    
     isDirectional = isDirectionHeld ? 'chargeJumpForward' : 'chargeJump';
     if (_getGrabbedObject(0)) {
       this.menuGridSnap();
@@ -1464,6 +1464,36 @@ const gameManager = {
       }
     }
   },
+
+  menuJumpBack(e) {
+    const localPlayer = metaversefileApi.useLocalPlayer();
+    if (!testOnce) {
+      console.log('pushing back')
+      localPlayer.characterPhysics.applyForceToForward(112);
+      localPlayer.characterPhysics.velocity.z += 112;
+      testOnce = true;
+    }
+   // 
+    localPlayer.removeAction('standCharge');
+    localPlayer.removeAction('chargeIdle');
+
+    if (_getGrabbedObject(0)) {
+      this.menuGridSnap();
+    } else {
+      const localPlayer = metaversefileApi.useLocalPlayer();
+      const action = localPlayer.getAction('chargeJumpBackward');
+
+      if (!action) {
+        const newAction = {
+          type: 'chargeJumpBackward',
+          animation: 'chargeJumpBackward',
+          // time: 0,
+        };
+        localPlayer.addAction(newAction);
+      }
+    }
+  },
+
   menuBDown(e) {
     if (e.ctrlKey) {
       universe.reload();

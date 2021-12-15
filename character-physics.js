@@ -55,9 +55,10 @@ class CharacterPhysics {
     }
   }
 
-  applyForceToForward(scaler) {
-    const val = new Vector3(this.velocity.x * scaler, this.velocity.y, this.velocity.z * scaler);
-    this.velocity.add(val)
+  applyForceToForward(scaler, reverse = false) {
+    const val = reverse ? new Vector3(-this.velocity.x * scaler, this.velocity.y, -this.velocity.z * scaler) : 
+    new Vector3(this.velocity.x * scaler, this.velocity.y, this.velocity.z * scaler);
+    this.velocity.add(val);
   }
 
   /* collideCapsule = (() => {
@@ -147,6 +148,8 @@ class CharacterPhysics {
         const _ensureNoJumpAction = () => {
           this.player.removeAction('chargeJump');
           this.player.removeAction('chargeJumpForward');
+          this.player.removeAction('chargeJumpBackward');
+
 
         };
 
@@ -159,9 +162,7 @@ class CharacterPhysics {
             const fallLoopAction = this.player.hasAction('fallLoop');
             const chargeAction = this.player.hasAction('chargeJump');
             const chargeJumpForward = this.player.hasAction('chargeJumpForward');
-            console.log(fallLoopAction, chargeAction, chargeJumpForward)
             if (fallLoopAction || chargeAction || chargeJumpForward) {
-            console.log('landing')
                 const localPlayer = metaversefileApi.useLocalPlayer();
                 const isLandingPlaying = localPlayer.avatar.landingState;
                 if(!isLandingPlaying )
